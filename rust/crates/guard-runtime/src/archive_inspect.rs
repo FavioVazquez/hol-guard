@@ -7,6 +7,10 @@
 //! outcome is a typed result on stdout with exit code 0; transport-level
 //! failures exit nonzero so the caller fails closed.
 
+#[cfg(unix)]
+use std::path::Path;
+#[cfg(unix)]
+use std::time::Duration;
 use std::time::Instant;
 
 use guard_archive::{ArchiveCaps, ArchiveOutcome, ArchiveStatus};
