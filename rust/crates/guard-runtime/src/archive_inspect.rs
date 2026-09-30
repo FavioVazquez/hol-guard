@@ -7,8 +7,7 @@
 //! outcome is a typed result on stdout with exit code 0; transport-level
 //! failures exit nonzero so the caller fails closed.
 
-use std::path::Path;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 use guard_archive::{ArchiveCaps, ArchiveOutcome, ArchiveStatus};
 use guard_contracts::{
