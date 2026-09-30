@@ -250,7 +250,7 @@ pub fn open_immutable_blob(path: &Path) -> Result<SecureBlob, SecureReadError> {
                 .modified()
                 .ok()
                 .zip(leaf.modified().ok())
-                .map_or(true, |(a, b)| a != b)
+                .is_none_or(|(a, b)| a != b)
         {
             return Err(SecureReadError::Changed);
         }
