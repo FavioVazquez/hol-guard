@@ -23,6 +23,10 @@
     "src/codex_plugin_scanner/guard/runtime/hook_payload_reference.py",
     "src/codex_plugin_scanner/guard/runtime/hook_review_engine.py",
     "src/codex_plugin_scanner/guard/runtime/hook_source_read.py",
+    "src/codex_plugin_scanner/guard/native_approval_bridge.py",
+    "src/codex_plugin_scanner/guard/native_approval_bridge_v3.py",
+    "src/codex_plugin_scanner/guard/native_approval_models.py",
+    "src/codex_plugin_scanner/guard/native_approval_v4_bridge.py",
     "src/codex_plugin_scanner/guard/runtime/offline_archive_contract.py",
     "src/codex_plugin_scanner/guard/runtime/offline_archive_inspection.py",
     "src/codex_plugin_scanner/guard/runtime/offline_archive_policy.py",
@@ -1704,6 +1708,91 @@
       "rationale": "ZCode generic emitter path test ran through the retired generic payload evaluator."
     },
     {
+      "old_node": "tests/test_native_approval_bridge.py::test_challenge_is_privacy_safe_and_wire_operation_is_exact",
+      "replacement_nodes": [
+        "rust/crates/guard-runtime/src/approval_v3_tests.rs::valid_artifact_allows_exact_review_and_returns_private_receipt",
+        "rust/crates/guard-runtime/src/approval_v3_tests.rs::request_identity_is_opaque_and_rust_derived_when_missing"
+      ],
+      "status": "native_behavior_ported_requires_ci"
+    },
+    {
+      "old_node": "tests/test_native_approval_bridge.py::test_validate_then_consume_is_immediate_and_receipt_is_bound",
+      "replacement_nodes": [
+        "rust/crates/guard-runtime/src/approval_v3_lifecycle_tests.rs::consume_requires_claim_and_is_single_use",
+        "rust/crates/guard-runtime/src/approval_v3_lifecycle_tests.rs::replay_and_concurrent_claim_are_single_use"
+      ],
+      "status": "native_behavior_ported_requires_ci"
+    },
+    {
+      "old_node": "tests/test_native_approval_bridge.py::test_preconsume_forged_cross_request_policy_and_harness_values_fail",
+      "replacement_nodes": [
+        "rust/crates/guard-runtime/src/approval_v3_lifecycle_tests.rs::policy_push_after_claim_before_consume_cannot_authorize_execution",
+        "rust/crates/guard-runtime/src/approval_v3_tests.rs::binding_mutations_are_rejected_even_when_resigned"
+      ],
+      "status": "native_behavior_ported_requires_ci"
+    },
+    {
+      "old_node": "tests/test_native_approval_bridge.py::test_continuation_rejects_non_session_before_private_field_access",
+      "replacement_nodes": [
+        "rust/crates/guard-runtime/src/approval_v3_lifecycle_tests.rs::consume_requires_claim_and_is_single_use"
+      ],
+      "status": "obsolete_implementation_assertion",
+      "rationale": "Asserted the Python bridge session object; the Rust authority enforces single-use claims without a Python session."
+    },
+    {
+      "old_node": "tests/test_native_approval_bridge.py::test_native_consumed_receipt_must_bind_full_context",
+      "replacement_nodes": [
+        "rust/crates/guard-runtime/src/approval_v3_lifecycle_tests.rs::artifact_binding_mutation_and_hard_floors_fail_before_claim",
+        "rust/crates/guard-runtime/src/approval_v3_lifecycle_tests.rs::artifact_timing_nonce_and_integrity_are_checked"
+      ],
+      "status": "native_behavior_ported_requires_ci"
+    },
+    {
+      "old_node": "tests/test_native_approval_bridge.py::test_native_consumed_receipt_missing_context_is_rejected_at_bridge",
+      "replacement_nodes": [
+        "rust/crates/guard-runtime/src/approval_v3_lifecycle_tests.rs::artifact_binding_mutation_and_hard_floors_fail_before_claim"
+      ],
+      "status": "native_behavior_ported_requires_ci"
+    },
+    {
+      "old_node": "tests/test_native_approval_bridge.py::test_cross_request_artifact_is_rejected_before_native_validation",
+      "replacement_nodes": [
+        "rust/crates/guard-runtime/src/approval_v3_lifecycle_tests.rs::artifact_timing_nonce_and_integrity_are_checked",
+        "rust/crates/guard-runtime/src/approval_v3_tests.rs::binding_mutations_are_rejected_even_when_resigned"
+      ],
+      "status": "native_behavior_ported_requires_ci"
+    },
+    {
+      "old_node": "tests/test_native_approval_bridge.py::test_legacy_database_row_and_forged_receipt_cannot_authorize",
+      "replacement_nodes": [
+        "rust/crates/guard-runtime/src/approval_v3_lifecycle_tests.rs::replay_and_concurrent_claim_are_single_use",
+        "rust/crates/guard-runtime/src/approval_replay_memory_transition_tests.rs::every_transition_prunes_expired_entries"
+      ],
+      "status": "native_behavior_ported_requires_ci"
+    },
+    {
+      "old_node": "tests/test_native_approval_v4_transport.py::test_v4_bridge_forwards_assertion_immediately",
+      "replacement_nodes": [
+        "rust/crates/guard-runtime/src/approval_v4_tests.rs::ed25519_assertion_validates_and_persists_counter_zero_and_one"
+      ],
+      "status": "native_behavior_ported_requires_ci"
+    },
+    {
+      "old_node": "tests/test_native_approval_v4_transport.py::test_v4_bridge_adapts_portal_proof_without_local_authority",
+      "replacement_nodes": [
+        "rust/crates/guard-runtime/src/approval_v4_negative_tests.rs::webauthn_origin_rp_flags_type_and_signature_are_verified_in_rust"
+      ],
+      "status": "native_behavior_ported_requires_ci"
+    },
+    {
+      "old_node": "tests/test_native_approval_v4_transport.py::test_v4_bridge_rejects_proof_bound_to_another_session",
+      "replacement_nodes": [
+        "rust/crates/guard-runtime/src/approval_v4_tests.rs::assertion_mutations_fail_before_replay_claim",
+        "rust/crates/guard-runtime/src/approval_v4_negative_tests.rs::v4_restart_and_concurrent_claims_fail_closed"
+      ],
+      "status": "native_behavior_ported_requires_ci"
+    },
+    {
       "old_node": "tests/test_guard_offline_archive_inspection.py::test_offline_archive_inspector_accepts_clean_digest_bound_archive",
       "replacement_nodes": [
         "tests/test_native_archive_inspection.py::test_archive_inspector_accepts_clean_digest_bound_archive"
@@ -1924,6 +2013,11 @@
       "old_node": "ci/native_runtime/test_guard_native_runtime_resident.py::test_hook_worker_shadow_ignores_native_exception",
       "new_node": "ci/native_runtime/test_native_hook_worker_modes.py::test_hook_worker_shadow_ignores_native_exception",
       "reason": "Unrelated hook-worker behavior preserved unchanged until its own semantic cutover."
+    },
+    {
+      "old_node": "tests/test_native_approval_bridge.py::test_decoders_reject_floor_lowering_unknown_fields_duplicate_json_and_unknown_errors",
+      "new_node": "tests/test_native_response_decoder.py::test_approval_decoders_reject_floor_lowering_and_tampering",
+      "reason": "Decoder floor-lowering and tamper negatives cover the live native_approval_protocol surface; bridge-specific assertions were retired."
     }
   ],
   "unchanged_regression_suites": [

@@ -345,6 +345,59 @@
       ]
     },
     {
+      "path": "src/codex_plugin_scanner/guard/native_approval_bridge.py",
+      "module": "codex_plugin_scanner.guard.native_approval_bridge",
+      "source_sha256": "596a38ee1bae02732aa4a51e58fe8c7d91f88e97dc97084a9e191166992c2184",
+      "forbidden_symbols": [
+        "NativeApprovalBridge",
+        "create_v4_challenge",
+        "validate_and_consume_v4"
+      ],
+      "native_replacements": [
+        "rust/crates/guard-runtime/src/approval.rs",
+        "rust/crates/guard-runtime/src/approval_v4.rs"
+      ]
+    },
+    {
+      "path": "src/codex_plugin_scanner/guard/native_approval_bridge_v3.py",
+      "module": "codex_plugin_scanner.guard.native_approval_bridge_v3",
+      "source_sha256": "78dbdc69139e429da5c68446e6c5368ba7d1b0a326b5746d92d60225b61811a3",
+      "forbidden_symbols": [
+        "NativeApprovalBridgeError",
+        "native_approval_continuation_allowed",
+        "native_approval_last_failure_code"
+      ],
+      "native_replacements": [
+        "rust/crates/guard-runtime/src/approval.rs"
+      ]
+    },
+    {
+      "path": "src/codex_plugin_scanner/guard/native_approval_v4_bridge.py",
+      "module": "codex_plugin_scanner.guard.native_approval_v4_bridge",
+      "source_sha256": "35fe0b33ff190cbb0bf7b9228b490dd92b86e5f09b75a937d96c2a7962119caf",
+      "forbidden_symbols": [
+        "create_v4_challenge",
+        "validate_and_consume_v4"
+      ],
+      "native_replacements": [
+        "rust/crates/guard-runtime/src/approval_v4.rs",
+        "rust/crates/guard-runtime/src/approval_v4_authority.rs"
+      ]
+    },
+    {
+      "path": "src/codex_plugin_scanner/guard/native_approval_models.py",
+      "module": "codex_plugin_scanner.guard.native_approval_models",
+      "source_sha256": "c616fba30ec640efd39535211d550a8e02af01f3a82db2c742f4fe1174697103",
+      "forbidden_symbols": [
+        "NativeApprovalSession",
+        "NativeConsumedReceipt",
+        "_receipt_matches_session"
+      ],
+      "native_replacements": [
+        "rust/crates/guard-runtime/src/approval.rs"
+      ]
+    },
+    {
       "path": "src/codex_plugin_scanner/guard/runtime/offline_archive_contract.py",
       "module": "codex_plugin_scanner.guard.runtime.offline_archive_contract",
       "source_sha256": "ab648e0429641751d80d269758459c045b4ab1d8285885fc6a53cc65c7f1d856",
@@ -429,6 +482,7 @@
     "tests/test_hook_review_engine.py",
     "tests/test_hook_security_regressions.py",
     "tests/test_hook_source_read_fast_path.py",
+    "tests/test_native_approval_bridge.py",
     "tests/test_guard_offline_archive_inspection.py"
   ]
 }
