@@ -517,11 +517,12 @@
    "id": "native_io",
    "class": "rust_io",
    "paths": [
+    "rust/crates/guard-archive/**",
     "rust/crates/guard-hook-core/**",
     "rust/crates/guard-secure-fs/**",
     "rust/crates/guard-runtime-windows-process/**"
    ],
-   "current": "PostToolUse output extraction, source validation, secure reads, identity, hashing, equivalence, and scanning",
+   "current": "PostToolUse output extraction, source validation, secure reads, identity, hashing, equivalence, scanning, and digest-bound offline archive inspection",
    "target": "all decision-critical hook content and source I/O"
   }
  ],

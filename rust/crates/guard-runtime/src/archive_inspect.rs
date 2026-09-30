@@ -308,7 +308,10 @@ fn apply_seccomp_deny_list() -> Result<(), ()> {
             flag,
         )
         .expect("static seccomp condition");
-        (syscall, vec![SeccompRule::new(vec![condition]).expect("non-empty rule")])
+        (
+            syscall,
+            vec![SeccompRule::new(vec![condition]).expect("non-empty rule")],
+        )
     }
 
     let mut rules: BTreeMap<i64, Vec<SeccompRule>> = BTreeMap::new();
