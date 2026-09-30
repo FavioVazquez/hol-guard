@@ -344,6 +344,7 @@
    "id": "native_edge_launcher",
    "class": "python_transport",
    "paths": [
+    "src/codex_plugin_scanner/guard/native_archive_inspection.py",
     "src/codex_plugin_scanner/guard/native_hook_edge.py",
     "src/codex_plugin_scanner/guard/native_decision_receipt.py",
     "src/codex_plugin_scanner/guard/native_response_decoder.py",
@@ -518,12 +519,11 @@
    "id": "native_io",
    "class": "rust_io",
    "paths": [
-    "rust/crates/guard-archive/**",
     "rust/crates/guard-hook-core/**",
     "rust/crates/guard-secure-fs/**",
     "rust/crates/guard-runtime-windows-process/**"
    ],
-   "current": "PostToolUse output extraction, source validation, secure reads, identity, hashing, equivalence, scanning, and digest-bound offline archive inspection",
+   "current": "PostToolUse output extraction, source validation, secure reads, identity, hashing, equivalence, and scanning",
    "target": "all decision-critical hook content and source I/O"
   }
  ],
