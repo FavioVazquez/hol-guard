@@ -135,7 +135,8 @@ fn run_inspection(request: &ArchiveInspectionRequestV1, caps: ArchiveCaps) -> Ar
     let deadline = Instant::now() + Duration::from_millis(request.timeout_ms);
     // If the spawning parent disappears the inspection is orphaned: stop
     // rather than burn the budget unattributed.
-    let halt = || nix::unistd::getppid().as_raw() == 1;
+    let original_parent = nix::unistd::getppid();
+    let halt = move || nix::unistd::getppid() != original_parent;
     guard_archive::inspect_path(
         Path::new(&request.archive_path),
         &request.expected_sha256,
@@ -297,20 +298,17 @@ fn apply_seccomp_deny_list() -> Result<(), ()> {
     use std::collections::BTreeMap;
 
     fn deny(syscall: i64) -> (i64, Vec<SeccompRule>) {
-        (syscall, vec![SeccompRule::new(Vec::new()).unwrap()])
+        (syscall, Vec::new())
     }
     fn deny_flagged(syscall: i64, arg_index: u8, flag: u64) -> (i64, Vec<SeccompRule>) {
-        (
-            syscall,
-            vec![SeccompRule::new(vec![SeccompCondition::new(
-                arg_index,
-                SeccompCmpArgLen::Qword,
-                SeccompCmpOp::MaskedEq,
-                flag,
-            )
-            .unwrap()])
-            .unwrap()],
+        let condition = SeccompCondition::new(
+            arg_index,
+            SeccompCmpArgLen::Qword,
+            SeccompCmpOp::MaskedEq(flag),
+            flag,
         )
+        .expect("static seccomp condition");
+        (syscall, vec![SeccompRule::new(vec![condition]).expect("non-empty rule")])
     }
 
     let mut rules: BTreeMap<i64, Vec<SeccompRule>> = BTreeMap::new();
