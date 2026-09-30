@@ -127,6 +127,9 @@ pub fn inspect_path(
     }
 }
 
-#[cfg(test)]
+// Blob admission is a Unix-only contract (descriptor walk, nlink/mode
+// checks); the retired Python path also refused non-POSIX platforms, so the
+// behavioral suite only runs there.
+#[cfg(all(test, unix))]
 #[path = "lib_tests.rs"]
 mod tests;
