@@ -11944,8 +11944,52 @@
                       "leading_options_with_values": [],
                       "operand_prefixes": [
                         "HTTP://",
-                        "HTTPS://",
+                        "HTTp://",
+                        "HTtP://",
+                        "HTtp://",
+                        "HtTP://",
+                        "HtTp://",
+                        "HttP://",
+                        "Http://",
+                        "hTTP://",
+                        "hTTp://",
+                        "hTtP://",
+                        "hTtp://",
+                        "htTP://",
+                        "htTp://",
+                        "httP://",
                         "http://",
+                        "HTTPS://",
+                        "HTTPs://",
+                        "HTTpS://",
+                        "HTTps://",
+                        "HTtPS://",
+                        "HTtPs://",
+                        "HTtpS://",
+                        "HTtps://",
+                        "HtTPS://",
+                        "HtTPs://",
+                        "HtTpS://",
+                        "HtTps://",
+                        "HttPS://",
+                        "HttPs://",
+                        "HttpS://",
+                        "Https://",
+                        "hTTPS://",
+                        "hTTPs://",
+                        "hTTpS://",
+                        "hTTps://",
+                        "hTtPS://",
+                        "hTtPs://",
+                        "hTtpS://",
+                        "hTtps://",
+                        "htTPS://",
+                        "htTPs://",
+                        "htTpS://",
+                        "htTps://",
+                        "httPS://",
+                        "httPs://",
+                        "httpS://",
                         "https://"
                       ],
                       "options_with_values": [
@@ -14187,6 +14231,19 @@
       "expected_effective_segments": [],
       "id": "report-not-matched-site-capture",
       "rule_id": "command.showtime.site-capture"
+    },
+    {
+      "command": "showtime reference hTtPs://example.org/media/clip.mp4",
+      "disabled_permissions": [],
+      "enabled_extensions": [
+        "command.showtime"
+      ],
+      "expected_action": "review",
+      "expected_effective_segments": [
+        0
+      ],
+      "id": "reference-url-mixed-case-scheme",
+      "rule_id": "command.showtime.reference-url"
     }
   ],
   "schema": "guard.command-extension-fixtures.v1"
