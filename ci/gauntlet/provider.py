@@ -14,12 +14,14 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
 from contextlib import suppress
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
 REQUEST_LIMIT = 1_000_000
 RESPONSE_LIMIT = 4_000_000
+REASONING_EFFORTS = ("minimal", "low", "medium", "high", "xhigh")
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -62,18 +64,24 @@ class InferenceRelay:
         allow_loopback: bool = False,
         max_rounds: int = 32,
         timeout: float = 120,
+        reasoning_effort: str | None = None,
     ):
         """Validate the provider and bind an unstarted loopback relay with bounded inference budgets."""
+        if reasoning_effort is not None and reasoning_effort not in REASONING_EFFORTS:
+            raise ValueError("unsupported reasoning effort")
         self.endpoint = validate_endpoint(base_url, allow_loopback)
         self.model = model
+        self.reasoning_effort = reasoning_effort
         self.identity = identity
         self._api_key = api_key
+        self._session_id = str(uuid.uuid4())
         self._canary = canary
         self.max_rounds = max_rounds
         self.timeout = timeout
         self.rounds: list[dict[str, Any]] = []
         self.export_violations = 0
         self._lock = threading.Lock()
+        self._settled = threading.Condition(self._lock)
         self._opener = urllib.request.build_opener(NoRedirect)
         relay = self
 
@@ -116,11 +124,13 @@ class InferenceRelay:
                     # The configured provider/model is fixed by the test operator.
                     payload["model"] = relay.model
                     payload["stream"] = True
+                    if relay.reasoning_effort is not None:
+                        # Pinned like the model so the agent cannot lower or raise it.
+                        payload["reasoning_effort"] = relay.reasoning_effort
                     forwarded = json.dumps(payload, ensure_ascii=False).encode()
-                    headers = {"Content-Type": "application/json", "Accept": "text/event-stream"}
-                    if relay._api_key:
-                        headers["Authorization"] = "Bearer " + relay._api_key
-                    request = urllib.request.Request(relay.endpoint, data=forwarded, headers=headers, method="POST")
+                    request = urllib.request.Request(
+                        relay.endpoint, data=forwarded, headers=relay._request_headers(), method="POST"
+                    )
                     started = time.monotonic()
                     digest = hashlib.sha256()
                     size = 0
@@ -151,6 +161,10 @@ class InferenceRelay:
                             self.wfile.write(line)
                             self.wfile.flush()
                             row["delivered_bytes"] += len(line)
+                            # DONE terminates an SSE event, even when the provider
+                            # keeps its HTTP connection open after the delimiter.
+                            if completed and not line.strip():
+                                break
                     with relay._lock:
                         row.update(
                             status="completed" if completed else "incomplete-stream",
@@ -159,6 +173,7 @@ class InferenceRelay:
                             response_bytes=size,
                             response_models=sorted(models),
                         )
+                        relay._settled.notify_all()
                 except Exception as exc:
                     with relay._lock:
                         if "row" in locals() and row["status"] == "started":
@@ -166,6 +181,7 @@ class InferenceRelay:
                             row["error_type"] = type(exc).__name__
                             if isinstance(exc, urllib.error.HTTPError):
                                 row["http_status"] = exc.code
+                            relay._settled.notify_all()
                     with suppress(OSError):
                         self.send_error(502, "Gauntlet live inference failed")
 
@@ -177,6 +193,18 @@ class InferenceRelay:
     def base_url(self) -> str:
         """Return the local OpenAI-compatible API base URL for the agent."""
         return f"http://127.0.0.1:{self.server.server_port}/v1"
+
+    def _request_headers(self) -> dict[str, str]:
+        """Identify the real client and keep routing stable within one scenario."""
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "text/event-stream",
+            "User-Agent": "hol-guard-gauntlet/1.0",
+            "x-opencode-session": self._session_id,
+        }
+        if self._api_key:
+            headers["Authorization"] = "Bearer " + self._api_key
+        return headers
 
     def __enter__(self):
         """Start serving inference requests and return this relay."""
@@ -190,15 +218,22 @@ class InferenceRelay:
         self.thread.join(timeout=3)
         self._api_key = None
 
-    def evidence(self) -> dict[str, Any]:
-        """Return metadata, never credentials or conversation bodies."""
-        with self._lock:
-            return {
+    def evidence(self, *, wait_seconds: float = 0) -> dict[str, Any]:
+        """Optionally await active requests; pending streams never become completed."""
+        with self._settled:
+            self._settled.wait_for(
+                lambda: all(row["status"] != "started" for row in self.rounds),
+                timeout=min(3.0, max(0.0, wait_seconds)),
+            )
+            evidence = {
                 "identity": self.identity,
                 "requested_model": self.model,
                 "live_rounds": [dict(row) for row in self.rounds],
                 "canary_export_violations": self.export_violations,
             }
+            if self.reasoning_effort is not None:
+                evidence["requested_reasoning_effort"] = self.reasoning_effort
+            return evidence
 
 
 class LoopbackCollector:
